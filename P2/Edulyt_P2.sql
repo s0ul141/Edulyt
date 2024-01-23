@@ -1,15 +1,19 @@
 -- Test Query
 SELECT * FROM credit_card_transaction.`credit card transactions - project - 2`;
+
+-- Questions 
+
+
 /*
 1. Write a query to print top 5 cities with highest spends and their percentage contribution of total credit
 card spends.
 */
-SELECT City, SUM(Amount) as TotalSpends,(SUM(Amount) / (SELECT SUM(Amount) 
+SELECT City, SUM(Amount) as Total_Spends,(SUM(Amount) / (SELECT SUM(Amount) 
 FROM credit_card_transaction.`credit card transactions - project - 2`) * 100) 
-as PercentageContribution
+as Percentage_Contribution
 FROM credit_card_transaction.`credit card transactions - project - 2`
 GROUP BY City
-ORDER BY TotalSpends DESC
+ORDER BY Total_Spends DESC
 LIMIT 5;
 
 /*
@@ -18,10 +22,10 @@ LIMIT 5;
 SELECT 
     Card_Type, 
     DATE_FORMAT(STR_TO_DATE(Date, '%d-%b-%y'), '%Y-%m') as Month, 
-    SUM(Amount) as TotalSpends
+    SUM(Amount) as Total_Spends
 FROM `credit_card_transaction`.`credit card transactions - project - 2`
 GROUP BY Card_Type, Month
-ORDER BY TotalSpends DESC;
+ORDER BY Total_Spends DESC;
 /*
 3. Write a query to print the transaction details (all columns from the table) for each card type when it
 reaches a cumulative of 1000000 total spends (We should have 4 rows in the o/p one for each card type).
@@ -74,11 +78,12 @@ WHERE HighExp.Rank = 1 AND LowExp.Rank = 1;
 SELECT 
     Exp_Type, 
     SUM(Amount) as Female_Spend,
-    (SUM(Amount) / (SELECT SUM(Amount) FROM `credit_card_transaction`.`credit card transactions - project - 2` WHERE Gender = 'Female')) * 100 as Percentage_Contribution
+    (SUM(Amount) / (SELECT SUM(Amount) 
+    FROM `credit_card_transaction`.`credit card transactions - project - 2` WHERE Gender = 'Female')) * 100 as Percentage_Contribution
 FROM 
     `credit_card_transaction`.`credit card transactions - project - 2`
 WHERE 
-    Gender = 'Female'
+    Gender = 'F'
 GROUP BY 
     Exp_Type;
 
@@ -86,14 +91,14 @@ GROUP BY
 7. Which card and expense type combination saw highest month over month growth in Jan-2014.
 */
 SELECT 
-    Jan_2014.Card_Type, 
-    Jan_2014.Exp_Type, 
-    ((Jan_2014.Jan_Spend - IFNULL(Dec_2013.Dec_Spend, 0)) / IFNULL(Dec_2013.Dec_Spend, 0)) * 100 as Growth_Percentage
+    Jan-14.Card_Type, 
+    Jan-14.Exp_Type, 
+    ((Jan-14.Jan_Spend - IFNULL(Dec_2013.Dec_Spend, 0)) / IFNULL(Dec_2013.Dec_Spend, 0)) * 100 as Growth_Percentage
 FROM 
 (
     SELECT Card_Type, Exp_Type, SUM(Amount) as Dec_Spend
     FROM `credit_card_transaction`.`credit card transactions - project - 2`
-    WHERE YEAR(Date) = 2013 AND MONTH(Date) = 12
+    WHERE YEAR(Date) = '2013' AND MONTH(Date) = 'Dec'
     GROUP BY Card_Type, Exp_Type
 ) as Dec_2013
 RIGHT JOIN 
