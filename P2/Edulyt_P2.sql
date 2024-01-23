@@ -90,43 +90,33 @@ GROUP BY
 /*
 7. Which card and expense type combination saw highest month over month growth in Jan-2014.
 */
-SELECT 
-    Jan-14.Card_Type, 
-    Jan-14.Exp_Type, 
-    ((Jan-14.Jan_Spend - IFNULL(Dec_2013.Dec_Spend, 0)) / IFNULL(Dec_2013.Dec_Spend, 0)) * 100 as Growth_Percentage
-FROM 
-(
-    SELECT Card_Type, Exp_Type, SUM(Amount) as Dec_Spend
-    FROM `credit_card_transaction`.`credit card transactions - project - 2`
-    WHERE YEAR(Date) = '2013' AND MONTH(Date) = 'Dec'
-    GROUP BY Card_Type, Exp_Type
-) as Dec_2013
-RIGHT JOIN 
-(
-    SELECT Card_Type, Exp_Type, SUM(Amount) as Jan_Spend
-    FROM `credit_card_transaction`.`credit card transactions - project - 2`
-    WHERE YEAR(Date) = 2014 AND MONTH(Date) = 1
-    GROUP BY Card_Type, Exp_Type
-) as Jan_2014 ON Dec_2013.Card_Type = Jan_2014.Card_Type AND Dec_2013.Exp_Type = Jan_2014.Exp_Type
-ORDER BY 
-    Growth_Percentage DESC
-LIMIT 1;
+SELECT Card_Type, Exp_Type, MAX(Amount) AS MaxAmount
+FROM credit_card_transaction.`credit card transactions - project - 2`
+WHERE Date LIKE '%%-Jan-14'
+GROUP BY Card_Type, Exp_Type;
 
 /*
 8. During weekends which city has highest total spend to total no of transaction’s ratio?
 */
-SELECT 
-    City, 
-    SUM(Amount) / COUNT(*) as Spend_Transaction_Ratio
-FROM 
-    `credit_card_transaction`.`credit card transactions - project - 2`
-WHERE 
-    DAYOFWEEK(Date) IN (1, 7)
-GROUP BY 
+SELECT
+    City,
+    SUM(Amount) / COUNT(*) AS SpendToTransactionRatio
+FROM (
+    SELECT
+        City,
+        STR_TO_DATE(Date, '%d-%b-%y') AS TransactionDate,
+        Amount
+    FROM
+        credit_card_transaction.`credit card transactions - project - 2` -- Replace with your actual table name
+) AS converted_data
+WHERE
+    DAYOFWEEK(TransactionDate) IN (1, 7) -- Assuming 1 is Sunday and 7 is Saturday
+GROUP BY
     City
-ORDER BY 
-    Spend_Transaction_Ratio DESC
-LIMIT 1;
+ORDER BY
+    SpendToTransactionRatio DESC
+LIMIT 5;
+
 
 /*
 9. Which city took least number of days to reach its 500th transaction after first transaction in that city?
