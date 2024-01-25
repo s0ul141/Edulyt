@@ -121,22 +121,17 @@ LIMIT 5;
 /*
 9. Which city took least number of days to reach its 500th transaction after first transaction in that city?
 */
-SELECT 
-    City, 
-    DATEDIFF(MAX(Date), MIN(Date)) as Days_to_500_Transactions
-FROM 
-(
-    SELECT 
-        City, 
-        Date, 
-        ROW_NUMBER() OVER (PARTITION BY City ORDER BY Date) as Transaction_Number
-    FROM 
-        `credit_card_transaction`.`credit card transactions - project - 2`
-) as Transactions
-WHERE 
-    Transaction_Number = 500
-GROUP BY 
-    City
-ORDER BY 
-    Days_to_500_Transactions
-LIMIT 1;
+SELECT City, DATEDIFF(STR_TO_DATE(DateOf500thTransaction, '%d-%b-%y'), STR_TO_DATE(DateOfFirstTransaction, '%d-%b-%y')) AS DaysTo500Transactions
+FROM (
+    SELECT City, MIN(Date) as DateOfFirstTransaction,
+           MAX(CASE WHEN TransactionNumber = 500 THEN Date END) as DateOf500thTransaction
+    FROM (
+        SELECT *, ROW_NUMBER() OVER (PARTITION BY City ORDER BY STR_TO_DATE(Date, '%d-%b-%y')) AS TransactionNumber
+        FROM credit_card_transaction.`credit card transactions - project - 2`
+    ) AS SubQuery
+    GROUP BY City
+) AS DateDiffQuery
+WHERE DateOf500thTransaction IS NOT NULL
+ORDER BY DaysTo500Transactions ASC
+LIMIT 3;
+
